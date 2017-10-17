@@ -4,9 +4,11 @@ require 'selenium-webdriver'
 USER = ""
 PASSWORD = ""
 CLOSET = ""
+SLEEP = 0.1
 
 driver = Selenium::WebDriver.for :chrome
 wait = Selenium::WebDriver::Wait.new(:timeout => 60)
+rand = Random.new
 
 # Login
 driver.get "https://poshmark.com/login"
@@ -27,7 +29,7 @@ while (old_shares.size != shares.size) do
   if loader.displayed? 
     wait.until { !driver.find_element(:id, "load-more").displayed? }
   end
-  sleep 0.5
+  sleep SLEEP*2
   shares = driver.find_elements(:class, "share")
 #  puts "There are #{shares.size} objects to share"
 end
@@ -37,13 +39,16 @@ shares.reverse.each_with_index do |i, index|
   spot = i.location 
   driver.execute_script("window.scrollTo(#{spot.x}, #{spot.y - 400})")
   i.click
+  sleep SLEEP
   driver.find_element(:class, "pm-followers-share-link").click
   wait.until { driver.find_element(:class, "flash-con").displayed? }
+  sleep SLEEP
+  driver.execute_script("$('.flash-con').hide()")
+  sleep SLEEP
 #  puts "Shared #{index+1}/#{shares.size}: #{i.attribute("data-pa-attr-listing_id")}"
   if (index+1)%10 == 0
     puts "Shared #{index+1}/#{shares.size}: #{i.attribute("data-pa-attr-listing_id")}"
   end
-  wait.until { !driver.find_element(:class, "flash-con").displayed? }
 end
 
 puts "Successfully shared #{shares.size} items with your followers"
