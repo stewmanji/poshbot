@@ -6,14 +6,17 @@ This repository includes a Ruby script that leverages Selenium to login to Poshm
 
 Sharing is limited to available items only and are shared in a manner that preserves the order of the closet when completed successfully. 
 
-
 ## Requirements
 
 In order to utilize the script, the following prerequisities must be met: 
 
-1. Ruby must be installed (minimum version 2.0)
+1. Ruby must be installed (minimum version 2.0) [link](https://www.ruby-lang.org/en/downloads/)
 2. Google Chrome Browser (minimum version 55.0)
 3. ChromeDriver - WebDriver for Chrome (version 2.33) [link](https://chromedriver.storage.googleapis.com/index.html?path=2.33/)
+    * [Linux x64](https://chromedriver.storage.googleapis.com/2.33/chromedriver_linux64.zip)
+    * [Linux x86](https://chromedriver.storage.googleapis.com/2.33/chromedriver_linux32.zip)
+    * [Mac](https://chromedriver.storage.googleapis.com/2.33/chromedriver_mac64.zip)
+    * [Windows - Chrome Driver](https://chromedriver.storage.googleapis.com/2.33/chromedriver_win32.zip)
 
 ## Usage
 
