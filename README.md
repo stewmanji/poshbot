@@ -26,3 +26,8 @@ In order to utilize the script, the following prerequisities must be met:
     * CLOSETS - This is the username(s) of the closet to share. This is commonly the same value as the USER. 
 
 2. Run the script: `ruby SeleniumPosh.rb`
+
+## Known Issues/Limitations
+
+* Poshmark occassionally intorduces a Captcha validation when logging in. The login may fail unless a human successfully completes the Captcha validation within 60 seconds. If the login fails, Poshbot will exit.
+* For large closets (100+ items), Poshmark occassionally triggers a Captcha when attempting to share an item. If this occurs a human must complete the Captcha validation. The log messages will fill with WARN statements indicating an infinity retry. 

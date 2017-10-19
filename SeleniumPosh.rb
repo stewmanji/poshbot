@@ -19,7 +19,7 @@ def login(driver, user, password)
     Selenium::WebDriver::Wait.new(:timeout => 60).until { driver.title.start_with? "Feed" }
     return true
   rescue
-    puts "Login failed"
+    puts "#{Time.now.strftime('%Y-%m-%d %H:%M:%S ')} ERROR: Login failed."
     return false
   end
 end
