@@ -1,9 +1,10 @@
 require 'rubygems'
 require 'selenium-webdriver'
 
+# Initialize the script
 USER = ""
 PASSWORD = ""
-CLOSET = ""
+CLOSETS = [""]
 SLEEP = 0.1
 DRIVER = Selenium::WebDriver.for :chrome
 
@@ -72,7 +73,8 @@ def share_item(driver, item)
     sleep SLEEP
     return true
   rescue
-    puts " WARN: Sharing #{item.attribute("data-pa-attr-listing_id")} failed, retrying..."
+    puts "#{Time.now.strftime('%Y-%m-%d %H:%M:%S ')} WARN: Sharing #{item.attribute("data-pa-attr-listing_id")} failed, retrying..."
+    sleep 1
     return false
   end
 end
@@ -85,17 +87,22 @@ def share_items(driver, items)
       share_item(driver, items[0])
     end 
   end
-  puts " INFO: Successfully shared #{items.size} items with your followers"
+  puts "#{Time.now.strftime('%Y-%m-%d %H:%M:%S ')} INFO: Successfully shared #{items.size} items with your followers"
 end
 
-# Initialize the script
+# Begin logic
 if login(DRIVER, USER, PASSWORD)
-  puts " INFO: Logged in successfully as #{USER}"
-  items_to_share = load_closet(DRIVER, CLOSET)
-  puts " INFO: Found #{items_to_share.size} items from #{CLOSET}'s closet"
-  puts " INFO: Starting to share, this may take some time"
-  share_items(DRIVER, items_to_share)
+  puts "#{Time.now.strftime('%Y-%m-%d %H:%M:%S ')} INFO: Logged in successfully as #{USER}"
+
+  # Share Each Closet
+  CLOSETS.each do |closet|
+    items_to_share = load_closet(DRIVER, closet)
+    puts "#{Time.now.strftime('%Y-%m-%d %H:%M:%S ')} INFO: Found #{items_to_share.size} items from #{closet}'s closet"
+    puts "#{Time.now.strftime('%Y-%m-%d %H:%M:%S ')} INFO: Starting to share, this may take some time"
+    share_items(DRIVER, items_to_share)
+  end
+
   if logout(DRIVER)
-    puts " INFO: Successfully logged out of Poshmark"
+    puts "#{Time.now.strftime('%Y-%m-%d %H:%M:%S ')} INFO: Successfully logged out of Poshmark"
   end
 end
