@@ -5,7 +5,7 @@ require 'selenium-webdriver'
 USER = ""
 PASSWORD = ""
 CLOSETS = [""]
-HEADLESS = false
+HEADLESS = true
 LIMIT = -1
 SLEEP = 0.1
 
