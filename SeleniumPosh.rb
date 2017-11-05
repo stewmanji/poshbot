@@ -5,8 +5,18 @@ require 'selenium-webdriver'
 USER = ""
 PASSWORD = ""
 CLOSETS = [""]
+HEADLESS = true
+LIMIT = -1
 SLEEP = 0.1
-DRIVER = Selenium::WebDriver.for :chrome
+
+# Initialize driver
+if HEADLESS 
+  DRIVEROPTS = Selenium::WebDriver::Chrome::Options.new
+  DRIVEROPTS.add_argument('--headless')
+  DRIVER = Selenium::WebDriver.for :chrome, options: DRIVEROPTS
+else 
+  DRIVER = Selenium::WebDriver.for :chrome
+end
 
 # login requires a driver, user and password.
 # login returns a boolean indicating if the login was successful or not
@@ -39,7 +49,7 @@ end
 
 # load_closet requires a driver and closet name
 # load_closet returns an array of all the available items 
-def load_closet(driver, closet)
+def load_closet(driver, closet, limit=-1)
   driver.get "https://poshmark.com/closet/" + closet + "?availability=available"
   loader = driver.find_element(:id, "load-more")
   old_shares = driver.find_elements(:class, "share")
@@ -54,6 +64,9 @@ def load_closet(driver, closet)
     end
     sleep SLEEP*2
     shares = driver.find_elements(:class, "share")
+    if ((limit != -1) && (shares.size >= limit))
+      return shares
+    end
   end
   return shares
 end 
@@ -81,13 +94,23 @@ end
 
 # share_items requires a driver and items array
 # share_items returns no value
-def share_items(driver, items)
-  items.reverse.each_with_index do |i, index| 
-    until share_item(driver, i) do
-      share_item(driver, items[0])
-    end 
+def share_items(driver, items, limit)
+  if (limit == -1)
+    items_to_share = items
+  else
+    items_to_share = items[0..limit-1]
+  end 
+  items_to_share.reverse.each_with_index do |i, index| 
+    unless share_item(driver, i)
+      until share_item(driver, i) do
+        share_item(driver, items[0])
+      end 
+    end
+#    if ((index+1)%10 == 0)
+#      puts "#{Time.now.strftime('%Y-%m-%d %H:%M:%S ')} INFO: Shared #{index+1} items so far"
+#    end
   end
-  puts "#{Time.now.strftime('%Y-%m-%d %H:%M:%S ')} INFO: Successfully shared #{items.size} items with your followers"
+  puts "#{Time.now.strftime('%Y-%m-%d %H:%M:%S ')} INFO: Successfully shared #{items_to_share.size} items with your followers"
 end
 
 # Begin logic
@@ -96,10 +119,13 @@ if login(DRIVER, USER, PASSWORD)
 
   # Share Each Closet
   CLOSETS.each do |closet|
-    items_to_share = load_closet(DRIVER, closet)
+    items_to_share = load_closet(DRIVER, closet, LIMIT)
     puts "#{Time.now.strftime('%Y-%m-%d %H:%M:%S ')} INFO: Found #{items_to_share.size} items from #{closet}'s closet"
+    unless (LIMIT == -1)
+      puts "#{Time.now.strftime('%Y-%m-%d %H:%M:%S ')} INFO: Shares limited manually to #{LIMIT}."
+    end 
     puts "#{Time.now.strftime('%Y-%m-%d %H:%M:%S ')} INFO: Starting to share, this may take some time"
-    share_items(DRIVER, items_to_share)
+    share_items(DRIVER, items_to_share, LIMIT)
   end
 
   if logout(DRIVER)
