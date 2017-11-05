@@ -27,6 +27,12 @@ In order to utilize the script, the following prerequisities must be met:
 
 2. Run the script: `ruby SeleniumPosh.rb`
 
+## Optional Parameters
+
+1. Edit variables in the SeleniumPosh.rb file
+    * LIMIT - The default value is -1 which is no limit. Set an integer limit for the number of items to share per closet.
+    * HEADLESS - This is a boolean value to determine if a user visable window should be launched during script execution. The default value is false.
+
 ## Known Issues/Limitations
 
 * Poshmark occassionally intorduces a Captcha validation when logging in. The login may fail unless a human successfully completes the Captcha validation within 60 seconds. If the login fails, Poshbot will exit.
