@@ -20,16 +20,16 @@ In order to utilize the script, the following prerequisities must be met:
 
 ## Usage
 
-1. Edit variables in the SeleniumPosh.rb file
+1. Edit variables in the poshbot.rb file
     * USER - This is the username that is used for login
     * PASSWORD - This is the password required for login
     * CLOSETS - This is the username(s) of the closet to share. This is commonly the same value as the USER. 
 
-2. Run the script: `ruby SeleniumPosh.rb`
+2. Run the script: `ruby poshbot.rb`
 
 ## Optional Parameters
 
-1. Edit variables in the SeleniumPosh.rb file
+1. Edit variables in the poshbot.rb file
     * LIMIT - The default value is -1 which is no limit. Set an integer limit for the number of items to share per closet.
     * HEADLESS - This is a boolean value to determine if a user visable window should be launched during script execution. The default value is false.
 
