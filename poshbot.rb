@@ -1,15 +1,27 @@
 require 'rubygems'
 require 'selenium-webdriver'
+require 'logger'
 
-# Initialize the script
+#Initialize logger
+LOGGER = Logger.new(STDOUT)
+LOGGER.level = Logger::DEBUG
+LOGGER.formatter = proc do |severity, datetime, progname, msg|
+  "#{datetime}: #{(severity+"     ").slice(0,5)}  #{msg}\n"
+end
+
+# User Properties
 USER = ""
 PASSWORD = ""
 CLOSETS = [""]
+
+# Custom Properties
 HEADLESS = true
 LIMIT = -1
-SLEEP = 0.1
+SLEEP = 0.15
+LOGGER.debug("Custom properties are HEADLESS=#{HEADLESS.to_s}, LIMIT=#{LIMIT.to_s}, SLEEP=#{SLEEP.to_s}")
 
 # Initialize driver
+LOGGER.debug("Initializing driver")
 if HEADLESS 
   DRIVEROPTS = Selenium::WebDriver::Chrome::Options.new
   DRIVEROPTS.add_argument('--headless')
@@ -17,19 +29,23 @@ if HEADLESS
 else 
   DRIVER = Selenium::WebDriver.for :chrome
 end
+LOGGER.debug("Driver initialized successfully")
 
 # login requires a driver, user and password.
 # login returns a boolean indicating if the login was successful or not
 def login(driver, user, password)
   driver.get "https://poshmark.com/login"
+  LOGGER.debug("Login page loaded successfully")
   driver.find_element(:id, "login_form_username_email").send_keys user
   driver.find_element(:id, "login_form_password").send_keys password
   driver.find_element(:id, "login_form_password").submit
+  LOGGER.debug("Login submitted")
   begin
     Selenium::WebDriver::Wait.new(:timeout => 60).until { driver.title.start_with? "Feed" }
+    LOGGER.info("Logged in successfully as #{USER}")
     return true
   rescue
-    puts "#{Time.now.strftime('%Y-%m-%d %H:%M:%S ')} ERROR: Login failed."
+    LOGGER.error("Login failed.")
     return false
   end
 end
@@ -51,6 +67,7 @@ end
 # load_closet returns an array of all the available items 
 def load_closet(driver, closet, limit=-1)
   driver.get "https://poshmark.com/closet/" + closet + "?availability=available"
+  LOGGER.debug("Loaded the first page of #{closet}'s closet")
   loader = driver.find_element(:id, "load-more")
   old_shares = driver.find_elements(:class, "share")
   shares = []
@@ -86,7 +103,7 @@ def share_item(driver, item)
     sleep SLEEP
     return true
   rescue
-    puts "#{Time.now.strftime('%Y-%m-%d %H:%M:%S ')} WARN: Sharing #{item.attribute("data-pa-attr-listing_id")} failed, retrying..."
+    LOGGER.warn("Sharing #{item.attribute("data-pa-attr-listing_id")} failed, retrying...")
     sleep 1
     return false
   end
@@ -106,29 +123,27 @@ def share_items(driver, items, limit)
         share_item(driver, items[0])
       end 
     end
-#    if ((index+1)%10 == 0)
-#      puts "#{Time.now.strftime('%Y-%m-%d %H:%M:%S ')} INFO: Shared #{index+1} items so far"
-#    end
+    LOGGER.debug("Shared #{index+1} items so far")
   end
-  puts "#{Time.now.strftime('%Y-%m-%d %H:%M:%S ')} INFO: Successfully shared #{items_to_share.size} items with your followers"
+  LOGGER.info("Successfully shared #{items_to_share.size} items with your followers")
 end
 
 # Begin logic
+LOGGER.debug("Script is beginning")
 if login(DRIVER, USER, PASSWORD)
-  puts "#{Time.now.strftime('%Y-%m-%d %H:%M:%S ')} INFO: Logged in successfully as #{USER}"
-
   # Share Each Closet
   CLOSETS.each do |closet|
     items_to_share = load_closet(DRIVER, closet, LIMIT)
-    puts "#{Time.now.strftime('%Y-%m-%d %H:%M:%S ')} INFO: Found #{items_to_share.size} items from #{closet}'s closet"
+    LOGGER.info( "Found #{items_to_share.size} items from #{closet}'s closet")
     unless (LIMIT == -1)
-      puts "#{Time.now.strftime('%Y-%m-%d %H:%M:%S ')} INFO: Shares limited manually to #{LIMIT}."
+      LOGGER.info( "Shares limited manually to #{LIMIT}.")
     end 
-    puts "#{Time.now.strftime('%Y-%m-%d %H:%M:%S ')} INFO: Starting to share, this may take some time"
+    LOGGER.info( "Starting to share, this may take some time")
     share_items(DRIVER, items_to_share, LIMIT)
   end
 
   if logout(DRIVER)
-    puts "#{Time.now.strftime('%Y-%m-%d %H:%M:%S ')} INFO: Successfully logged out of Poshmark"
+    LOGGER.info("Successfully logged out of Poshmark")
   end
 end
+LOGGER.debug("Script is completed")
